@@ -62,7 +62,6 @@ Future<String?> getUID() async {
   return await firebaseAuth.currentUser?.uid;
 }
 
-
 //Profile
 Future<bool?> createProfile(ProfileModel model) async {
   bool? isDetails;
@@ -114,20 +113,25 @@ Stream<QuerySnapshot<Map<String, dynamic>>> myAllChatUser() {
   FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   var user = firebaseAuth.currentUser;
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-    return firestore.collection('chat').where("users",arrayContainsAny: ["${user!.uid}"]).snapshots();
+  return firestore
+      .collection('chat')
+      .where("users", arrayContainsAny: ["${user!.uid}"]).snapshots();
 }
 
 //sendMSg
 void addChatMsg({ChatMsgModel? chatmodel, ChatUserModel? model}) async {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
-  await firestore.collection("chat").doc(model!.docId).collection("Message").add({
+  await firestore
+      .collection("chat")
+      .doc(model!.docId)
+      .collection("Message")
+      .add({
     "date": chatmodel!.date,
     "docId": model.docId,
     "msg": chatmodel.msg,
     "uid": chatmodel.uid,
   });
 }
-
 
 //read User Wise Chat
 Stream<QuerySnapshot<Map<String, dynamic>>> readMsg(String docId) {
@@ -136,7 +140,19 @@ Stream<QuerySnapshot<Map<String, dynamic>>> readMsg(String docId) {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   print("========= ${user!.uid}");
-  return firestore.collection('chat').doc("$docId").collection("Message").orderBy('date',descending: true).snapshots();
+  return firestore
+      .collection('chat')
+      .doc("$docId")
+      .collection("Message")
+      .orderBy('date', descending: true)
+      .snapshots();
 }
 
+//read userDetails in Database
+Future<DocumentSnapshot<Map<String, dynamic>>> readUserDataViaDatabase() {
+  FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+  var user = firebaseAuth.currentUser;
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+  return firestore.collection("profiles").doc(user!.uid).get();
+}
